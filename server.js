@@ -13,20 +13,16 @@ if (!BOT_TOKEN || !ADMIN_CHAT_ID || isNaN(ADMIN_CHAT_ID)) {
   process.exit(1);
 }
 
-// ── Express ──
 const app = express();
-app.use(express.json({ limit: '10kb' })); // prevent oversized payloads
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.static(__dirname));
 
-// ── HTTP Server + WebSocket ──
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-// ── In-memory store: orderId → { category, label, price, odds, ws, createdAt } ──
 const orders = new Map();
-const ORDER_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const ORDER_TTL_MS = 30 * 60 * 1000;
 
-// Periodic cleanup of expired orders
 setInterval(() => {
   const now = Date.now();
   for (const [id, order] of orders) {
@@ -36,12 +32,11 @@ setInterval(() => {
         order.ws.close(1000);
       }
       orders.delete(id);
-      console.log(`🗑️ Order ${id} expired and cleaned up.`);
+      console.log(`🗑️ Order ${id} expired.`);
     }
   }
-}, 60 * 1000); // check every minute
+}, 60 * 1000);
 
-// ── WebSocket: track which socket belongs to which order ──
 wss.on('connection', (ws) => {
   let boundOrderId = null;
 
@@ -49,7 +44,6 @@ wss.on('connection', (ws) => {
     try {
       const { orderId } = JSON.parse(data.toString());
       if (orders.has(orderId)) {
-        // If there's an old socket, close it
         const order = orders.get(orderId);
         if (order.ws && order.ws !== ws && order.ws.readyState === WebSocket.OPEN) {
           order.ws.close(1000);
@@ -57,34 +51,27 @@ wss.on('connection', (ws) => {
         order.ws = ws;
         boundOrderId = orderId;
       }
-    } catch (e) { /* ignore malformed */ }
+    } catch (e) {}
   });
 
   ws.on('close', () => {
-    // Clean up reference if this socket was the active one
     if (boundOrderId && orders.has(boundOrderId)) {
       const order = orders.get(boundOrderId);
-      if (order.ws === ws) {
-        order.ws = null;
-      }
+      if (order.ws === ws) order.ws = null;
     }
   });
 
   ws.on('error', () => {
     if (boundOrderId && orders.has(boundOrderId)) {
       const order = orders.get(boundOrderId);
-      if (order.ws === ws) {
-        order.ws = null;
-      }
+      if (order.ws === ws) order.ws = null;
     }
   });
 });
 
-// ── Telegram Bot (polling mode) ──
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
 bot.on('message', (msg) => {
-  // 🔒 Only accept messages from the admin
   if (msg.from.id !== ADMIN_CHAT_ID) return;
 
   const text = (msg.text || '').trim();
@@ -94,7 +81,6 @@ bot.on('message', (msg) => {
     const order = orders.get(parts[0]);
     const odds = parts.slice(1).join(' ');
 
-    // Push result to user's browser via WebSocket
     if (order.ws && order.ws.readyState === WebSocket.OPEN) {
       order.ws.send(JSON.stringify({
         type: 'result',
@@ -105,7 +91,6 @@ bot.on('message', (msg) => {
       }));
     }
 
-    // Confirm to admin
     bot.sendMessage(ADMIN_CHAT_ID, `✅ Order ${parts[0]} delivered.\nOdds sent: ${odds}`);
     orders.delete(parts[0]);
   } else if (text === '/start') {
@@ -118,7 +103,6 @@ bot.on('message', (msg) => {
   }
 });
 
-// ── API: Create Order ──
 app.post('/api/create-order', (req, res) => {
   const { category, label, price, odds, paymentMessage } = req.body;
 
@@ -126,16 +110,13 @@ app.post('/api/create-order', (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Basic validation
   const safePrice = parseInt(price, 10);
   if (isNaN(safePrice) || safePrice <= 0) {
     return res.status(400).json({ error: 'Invalid price' });
   }
 
-  // Sanitize: truncate payment message to stay under Telegram's 4096 limit
   const safeMsg = String(paymentMessage).substring(0, 4000);
 
-  // Generate short order ID (6 chars, no ambiguous chars)
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let orderId = '';
   for (let i = 0; i < 6; i++) {
@@ -151,7 +132,6 @@ app.post('/api/create-order', (req, res) => {
     createdAt: Date.now()
   });
 
-  // Notify admin via Telegram
   const adminMsg =
     `🆕 NEW ORDER: ${orderId}\n` +
     `━━━━━━━━━━━━━━━━━\n` +
@@ -171,22 +151,19 @@ app.post('/api/create-order', (req, res) => {
   res.json({ orderId });
 });
 
-// ── Health check (Render) ──
 app.get('/healthz', (_req, res) => res.sendStatus(200));
 
-// ── Graceful shutdown (Render SIGTERM) ──
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
+  console.log('SIGTERM received. Shutting down...');
   server.close(() => {
-    wss.clients.forEach(ws => ws.close(1001, 'Server shutting down'));
+    wss.clients.forEach(ws => ws.close(1001));
     bot.stopPolling();
     process.exit(0);
   });
   setTimeout(() => process.exit(1), 10000);
 });
 
-// ── Start ──
 server.listen(PORT, () => {
-  console.log(`✅ LegitOdds server running on port ${PORT}`);
-  console.log(`🤖 Telegram bot polling started (admin: ${ADMIN_CHAT_ID})`);
+  console.log(`✅ LegitOdds running on port ${PORT}`);
+  console.log(`🤖 Bot polling started (admin: ${ADMIN_CHAT_ID})`);
 });   
