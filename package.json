@@ -1,15 +1,17 @@
-// package.json
 {
-  "name": "momo-loan-app",
+  "name": "legitodds",
   "version": "1.0.0",
-  "description": "Momo Loan Application Website",
+  "description": "LegitOdds - Trusted Odds Store",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
-    "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "node-telegram-bot-api": "^0.66.0"
   }
-}
+}   
