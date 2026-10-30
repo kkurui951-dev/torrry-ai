@@ -52,6 +52,8 @@
   .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#000; }
   .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,214,143,.3); }
   .btn-secondary { background:var(--card-hover); color:var(--text); border:1px solid var(--border); }
+  .btn-danger { background:rgba(248,81,73,.15); color:var(--danger); border:1px solid var(--danger); }
+  .btn-danger:hover { background:rgba(248,81,73,.25); }
 
   .verify-msg { padding:14px 18px; border-radius:10px; margin-top:16px; font-size:.9rem; display:none; align-items:center; gap:10px; }
   .verify-msg.error { display:flex; background:rgba(248,81,73,.1); border:1px solid var(--danger); color:var(--danger); }
@@ -64,6 +66,7 @@
   @keyframes spin { to{transform:rotate(360deg)} }
   .waiting h3 { color:var(--accent); margin-top:16px; font-size:1.2rem; }
   .waiting p { color:var(--muted); font-size:.9rem; margin-top:8px; }
+  .waiting .timer { color:var(--warn); font-size:.85rem; margin-top:12px; }
 
   .result-page { display:none; text-align:center; padding:40px 20px; animation:slideUp .5s ease; }
   .result-page.active { display:block; }
@@ -144,7 +147,7 @@
     <div class="pay-instruction">
       <strong>Step 1 — Make Payment</strong><br>
       Send the exact amount via <strong>M-Pesa</strong> or <strong>Airtel Money</strong>:
-      <span class="phone" id="phoneNum">0785 639 307</span>
+      <span class="phone">0785 639 307</span>
       <button class="copy-btn" onclick="copyPhone()">📋 Copy</button>
     </div>
     <div class="form-group">
@@ -158,9 +161,11 @@
 
   <!-- WAITING -->
   <section id="waitingSection" class="waiting">
-    <div class="spinner-lg"></div>
-    <h3>Waiting for Verification...</h3>
-    <p>Your order has been sent. Our team is verifying your payment.<br>Please keep this page open — your odds will appear here shortly.</p>
+    <div class="spinner-lg" id="waitSpinner"></div>
+    <h3 id="waitTitle">Waiting for Verification...</h3>
+    <p id="waitText">Your order has been sent. Our team is verifying your payment.<br>Please keep this page open — your odds will appear here shortly.</p>
+    <div class="timer" id="waitTimer"></div>
+    <button class="btn btn-danger" id="cancelBtn" onclick="cancelOrder()">✕ Cancel Order</button>
   </section>
 
   <!-- RESULT -->
@@ -182,9 +187,16 @@
 
 <script>
 const PAYMENT_PHONE = "0785639307";
+const MAX_RETRIES = 5;
+const WAIT_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
 let selectedOdds = null;
 let currentOrderId = null;
 let ws = null;
+let wsClosed = false;
+let retryCount = 0;
+let waitTimerInterval = null;
+let waitTimeoutId = null;
 
 // ── Odds Selection ──
 document.querySelectorAll('.odds-row').forEach(row => {
@@ -225,7 +237,7 @@ async function submitOrder() {
     return;
   }
 
-  // Client-side amount check
+  // Client-side amount check (soft check — admin does final verification)
   const amountMatch = msg.match(/(?:KSh|KES|Sh|Ksh)\s*([\d,]+(?:\.\d+)?)/i);
   let paidAmount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, '')) : null;
   if (!paidAmount) {
@@ -255,14 +267,15 @@ async function submitOrder() {
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed');
+    if (!res.ok) throw new Error(data.error || 'Failed to create order');
 
     currentOrderId = data.orderId;
+    retryCount = 0;
+    wsClosed = false;
 
-    // Connect WebSocket to receive result
     connectWS(currentOrderId);
+    startWaitTimer();
 
-    // Show waiting
     document.getElementById('payPanel').classList.remove('active');
     document.getElementById('waitingSection').classList.add('active');
   } catch (e) {
@@ -275,27 +288,94 @@ async function submitOrder() {
 
 // ── WebSocket ──
 function connectWS(orderId) {
+  if (wsClosed) return;
+
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(`${protocol}//${location.host}/ws`);
 
   ws.onopen = () => {
+    if (wsClosed) return;
     ws.send(JSON.stringify({ orderId }));
   };
 
   ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'result') {
-      showResult(data.odds, data.category, data.label);
-      ws.close();
-    }
+    if (wsClosed) return;
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'result') {
+        stopWaitTimer();
+        showResult(data.odds, data.category, data.label);
+        wsClosed = true;
+        ws.close();
+      } else if (data.type === 'expired') {
+        stopWaitTimer();
+        showWaitError('Your order has expired. Please try again.');
+        wsClosed = true;
+        ws.close();
+      }
+    } catch (e) { /* ignore */ }
   };
 
   ws.onclose = () => {
-    // Reconnect with backoff if still waiting
+    if (wsClosed) return;
+    // Only reconnect if still waiting and under retry limit
     if (document.getElementById('waitingSection').classList.contains('active')) {
-      setTimeout(() => connectWS(orderId), 3000);
+      retryCount++;
+      if (retryCount >= MAX_RETRIES) {
+        stopWaitTimer();
+        showWaitError('Connection lost. Please refresh the page and try again.');
+        return;
+      }
+      // Exponential backoff: 3s, 6s, 12s, 24s, 48s
+      const delay = 3000 * Math.pow(2, retryCount - 1);
+      setTimeout(() => {
+        if (!wsClosed) connectWS(orderId);
+      }, delay);
     }
   };
+
+  ws.onerror = () => {
+    // onclose will fire after onerror, handled there
+  };
+}
+
+// ── Wait Timer ──
+function startWaitTimer() {
+  const start = Date.now();
+  const timerEl = document.getElementById('waitTimer');
+  timerEl.textContent = '';
+
+  waitTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - start) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    timerEl.textContent = `Elapsed: ${mins}m ${secs}s`;
+  }, 1000);
+
+  waitTimeoutId = setTimeout(() => {
+    stopWaitTimer();
+    showWaitError('Verification timed out. Please contact support or try again.');
+  }, WAIT_TIMEOUT_MS);
+}
+
+function stopWaitTimer() {
+  if (waitTimerInterval) { clearInterval(waitTimerInterval); waitTimerInterval = null; }
+  if (waitTimeoutId) { clearTimeout(waitTimeoutId); waitTimeoutId = null; }
+}
+
+function showWaitError(message) {
+  document.getElementById('waitSpinner').style.display = 'none';
+  document.getElementById('waitTitle').textContent = '⚠️ ' + message;
+  document.getElementById('waitText').textContent = '';
+  document.getElementById('cancelBtn').textContent = '← Back to Store';
+}
+
+// ── Cancel Order ──
+function cancelOrder() {
+  wsClosed = true;
+  stopWaitTimer();
+  if (ws) { ws.close(); ws = null; }
+  resetAll();
 }
 
 // ── Show Result ──
@@ -309,14 +389,23 @@ function showResult(odds, category, label) {
 
 // ── Reset ──
 function resetAll() {
+  wsClosed = true;
+  stopWaitTimer();
   if (ws) { ws.close(); ws = null; }
   document.getElementById('shopSection').style.display = '';
   document.getElementById('payPanel').classList.remove('active');
   document.getElementById('waitingSection').classList.remove('active');
   document.getElementById('resultPage').classList.remove('active');
+  // Reset waiting section for next use
+  document.getElementById('waitSpinner').style.display = '';
+  document.getElementById('waitTitle').textContent = 'Waiting for Verification...';
+  document.getElementById('waitText').innerHTML = 'Your order has been sent. Our team is verifying your payment.<br>Please keep this page open — your odds will appear here shortly.';
+  document.getElementById('waitTimer').textContent = '';
+  document.getElementById('cancelBtn').textContent = '✕ Cancel Order';
   document.querySelectorAll('.odds-row').forEach(r => r.classList.remove('selected'));
   selectedOdds = null;
   currentOrderId = null;
+  retryCount = 0;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
