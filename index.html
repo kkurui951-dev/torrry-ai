@@ -14,13 +14,11 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6; }
-
   header { background:linear-gradient(135deg,#0d1117,#1a2332); border-bottom:2px solid var(--accent); padding:20px 24px; text-align:center; position:sticky; top:0; z-index:100; }
   header h1 { font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,var(--accent),#60a5fa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   header p { color:var(--muted); font-size:.9rem; margin-top:4px; }
   .trust-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(0,214,143,.1); border:1px solid var(--accent); border-radius:20px; padding:4px 14px; font-size:.75rem; color:var(--accent); margin-top:8px; }
   .trust-badge::before { content:"✓"; font-weight:bold; }
-
   main { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
   .cat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:32px; }
   .cat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:all .25s; }
@@ -32,7 +30,6 @@
   .odds-row.selected { background:rgba(0,214,143,.12); border-color:var(--accent); box-shadow:0 0 12px rgba(0,214,143,.15); }
   .odds-row .label { font-weight:600; font-size:.95rem; }
   .odds-row .price { color:var(--accent); font-weight:700; font-size:.95rem; }
-
   .pay-panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; display:none; animation:slideUp .4s ease; }
   .pay-panel.active { display:block; }
   @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -42,24 +39,20 @@
   .pay-instruction { background:rgba(210,153,34,.1); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:.9rem; line-height:1.7; }
   .pay-instruction .phone { font-size:1.3rem; font-weight:800; color:var(--warn); letter-spacing:1px; display:block; margin:6px 0; }
   .pay-instruction .copy-btn { background:var(--warn); color:#000; border:none; border-radius:6px; padding:3px 10px; font-size:.75rem; cursor:pointer; font-weight:700; margin-left:8px; vertical-align:middle; }
-
   .form-group { margin-top:18px; }
   .form-group label { display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
   .form-group textarea { width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; font-family:inherit; transition:border-color .2s; min-height:100px; resize:vertical; }
   .form-group textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,214,143,.1); }
-
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 32px; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; margin-top:20px; width:100%; }
   .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#000; }
   .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,214,143,.3); }
   .btn-secondary { background:var(--card-hover); color:var(--text); border:1px solid var(--border); }
   .btn-danger { background:rgba(248,81,73,.15); color:var(--danger); border:1px solid var(--danger); }
   .btn-danger:hover { background:rgba(248,81,73,.25); }
-
   .verify-msg { padding:14px 18px; border-radius:10px; margin-top:16px; font-size:.9rem; display:none; align-items:center; gap:10px; }
   .verify-msg.error { display:flex; background:rgba(248,81,73,.1); border:1px solid var(--danger); color:var(--danger); }
   .verify-msg.success { display:flex; background:rgba(0,214,143,.1); border:1px solid var(--accent); color:var(--accent); }
   .verify-msg .icon { font-size:1.3rem; }
-
   .waiting { display:none; text-align:center; padding:40px 20px; }
   .waiting.active { display:block; }
   .waiting .spinner-lg { display:inline-block; width:48px; height:48px; border:4px solid rgba(0,214,143,.2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
@@ -67,7 +60,6 @@
   .waiting h3 { color:var(--accent); margin-top:16px; font-size:1.2rem; }
   .waiting p { color:var(--muted); font-size:.9rem; margin-top:8px; }
   .waiting .timer { color:var(--warn); font-size:.85rem; margin-top:12px; }
-
   .result-page { display:none; text-align:center; padding:40px 20px; animation:slideUp .5s ease; }
   .result-page.active { display:block; }
   .result-icon { font-size:4rem; margin-bottom:16px; animation:pop .5s ease; }
@@ -78,7 +70,6 @@
   .odds-display .odds-label { font-size:.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
   .odds-display .odds-value { font-size:2.5rem; font-weight:900; color:var(--accent); letter-spacing:-1px; }
   .odds-display .odds-cat { font-size:.9rem; color:var(--muted); margin-top:8px; }
-
   footer { text-align:center; padding:24px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--border); margin-top:40px; }
   @media(max-width:600px) { .cat-grid{grid-template-columns:1fr} header h1{font-size:1.4rem} .pay-panel{padding:20px} .odds-display .odds-value{font-size:1.8rem} }
 </style>
@@ -92,7 +83,6 @@
 </header>
 
 <main>
-  <!-- SHOP -->
   <section id="shopSection">
     <div class="cat-grid">
       <div class="cat-card">
@@ -140,7 +130,6 @@
     </div>
   </section>
 
-  <!-- PAYMENT -->
   <section id="payPanel" class="pay-panel">
     <h2>💳 Complete Your Purchase</h2>
     <div class="summary" id="paySummary"></div>
@@ -159,7 +148,6 @@
     <button class="btn btn-secondary" onclick="resetAll()">← Back to Odds</button>
   </section>
 
-  <!-- WAITING -->
   <section id="waitingSection" class="waiting">
     <div class="spinner-lg" id="waitSpinner"></div>
     <h3 id="waitTitle">Waiting for Verification...</h3>
@@ -168,7 +156,6 @@
     <button class="btn btn-danger" id="cancelBtn" onclick="cancelOrder()">✕ Cancel Order</button>
   </section>
 
-  <!-- RESULT -->
   <section id="resultPage" class="result-page">
     <div class="result-icon">🎉</div>
     <h2>Your Odds Are Ready!</h2>
@@ -188,7 +175,7 @@
 <script>
 const PAYMENT_PHONE = "0785639307";
 const MAX_RETRIES = 5;
-const WAIT_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+const WAIT_TIMEOUT_MS = 10 * 60 * 1000;
 
 let selectedOdds = null;
 let currentOrderId = null;
@@ -198,7 +185,6 @@ let retryCount = 0;
 let waitTimerInterval = null;
 let waitTimeoutId = null;
 
-// ── Odds Selection ──
 document.querySelectorAll('.odds-row').forEach(row => {
   row.addEventListener('click', () => {
     document.querySelectorAll('.odds-row').forEach(r => r.classList.remove('selected'));
@@ -225,7 +211,6 @@ function showPayPanel() {
   panel.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── Submit Order ──
 async function submitOrder() {
   const msg = document.getElementById('paymentMsg').value.trim();
   const verifyMsg = document.getElementById('verifyMsg');
@@ -237,7 +222,6 @@ async function submitOrder() {
     return;
   }
 
-  // Client-side amount check (soft check — admin does final verification)
   const amountMatch = msg.match(/(?:KSh|KES|Sh|Ksh)\s*([\d,]+(?:\.\d+)?)/i);
   let paidAmount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, '')) : null;
   if (!paidAmount) {
@@ -267,7 +251,7 @@ async function submitOrder() {
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create order');
+    if (!res.ok) throw new Error(data.error || 'Failed');
 
     currentOrderId = data.orderId;
     retryCount = 0;
@@ -286,10 +270,8 @@ async function submitOrder() {
   }
 }
 
-// ── WebSocket ──
 function connectWS(orderId) {
   if (wsClosed) return;
-
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(`${protocol}//${location.host}/ws`);
 
@@ -313,48 +295,37 @@ function connectWS(orderId) {
         wsClosed = true;
         ws.close();
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
   };
 
   ws.onclose = () => {
     if (wsClosed) return;
-    // Only reconnect if still waiting and under retry limit
     if (document.getElementById('waitingSection').classList.contains('active')) {
       retryCount++;
       if (retryCount >= MAX_RETRIES) {
         stopWaitTimer();
-        showWaitError('Connection lost. Please refresh the page and try again.');
+        showWaitError('Connection lost. Please refresh and try again.');
         return;
       }
-      // Exponential backoff: 3s, 6s, 12s, 24s, 48s
       const delay = 3000 * Math.pow(2, retryCount - 1);
-      setTimeout(() => {
-        if (!wsClosed) connectWS(orderId);
-      }, delay);
+      setTimeout(() => { if (!wsClosed) connectWS(orderId); }, delay);
     }
   };
 
-  ws.onerror = () => {
-    // onclose will fire after onerror, handled there
-  };
+  ws.onerror = () => {};
 }
 
-// ── Wait Timer ──
 function startWaitTimer() {
   const start = Date.now();
   const timerEl = document.getElementById('waitTimer');
   timerEl.textContent = '';
-
   waitTimerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - start) / 1000);
-    const mins = Math.floor(elapsed / 60);
-    const secs = elapsed % 60;
-    timerEl.textContent = `Elapsed: ${mins}m ${secs}s`;
+    timerEl.textContent = `Elapsed: ${Math.floor(elapsed/60)}m ${elapsed%60}s`;
   }, 1000);
-
   waitTimeoutId = setTimeout(() => {
     stopWaitTimer();
-    showWaitError('Verification timed out. Please contact support or try again.');
+    showWaitError('Verification timed out. Please try again.');
   }, WAIT_TIMEOUT_MS);
 }
 
@@ -370,7 +341,6 @@ function showWaitError(message) {
   document.getElementById('cancelBtn').textContent = '← Back to Store';
 }
 
-// ── Cancel Order ──
 function cancelOrder() {
   wsClosed = true;
   stopWaitTimer();
@@ -378,7 +348,6 @@ function cancelOrder() {
   resetAll();
 }
 
-// ── Show Result ──
 function showResult(odds, category, label) {
   document.getElementById('waitingSection').classList.remove('active');
   document.getElementById('resultOdds').textContent = odds;
@@ -387,7 +356,6 @@ function showResult(odds, category, label) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Reset ──
 function resetAll() {
   wsClosed = true;
   stopWaitTimer();
@@ -396,7 +364,6 @@ function resetAll() {
   document.getElementById('payPanel').classList.remove('active');
   document.getElementById('waitingSection').classList.remove('active');
   document.getElementById('resultPage').classList.remove('active');
-  // Reset waiting section for next use
   document.getElementById('waitSpinner').style.display = '';
   document.getElementById('waitTitle').textContent = 'Waiting for Verification...';
   document.getElementById('waitText').innerHTML = 'Your order has been sent. Our team is verifying your payment.<br>Please keep this page open — your odds will appear here shortly.';
@@ -409,7 +376,6 @@ function resetAll() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Copy Phone ──
 function copyPhone() {
   navigator.clipboard.writeText(PAYMENT_PHONE).then(() => {
     const btn = document.querySelector('.copy-btn');
