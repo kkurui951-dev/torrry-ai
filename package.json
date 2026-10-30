@@ -1,6 +1,6 @@
 {
   "name": "legitodds",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "LegitOdds - Trusted Odds Store",
   "main": "server.js",
   "scripts": {
