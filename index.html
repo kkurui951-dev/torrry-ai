@@ -1,152 +1,333 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Momo Loan Application</title>
-    <style>
-        body {
-            background-color: yellow;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegitOdds – Trusted Odds Store</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --card-hover: #1c2333;
+    --accent: #00d68f; --accent-dark: #00b377;
+    --text: #e6edf3; --muted: #8b949e;
+    --danger: #f85149; --warn: #d29922;
+    --border: #30363d; --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6; }
+
+  header { background:linear-gradient(135deg,#0d1117,#1a2332); border-bottom:2px solid var(--accent); padding:20px 24px; text-align:center; position:sticky; top:0; z-index:100; }
+  header h1 { font-size:1.8rem; font-weight:800; background:linear-gradient(90deg,var(--accent),#60a5fa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  header p { color:var(--muted); font-size:.9rem; margin-top:4px; }
+  .trust-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(0,214,143,.1); border:1px solid var(--accent); border-radius:20px; padding:4px 14px; font-size:.75rem; color:var(--accent); margin-top:8px; }
+  .trust-badge::before { content:"✓"; font-weight:bold; }
+
+  main { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
+  .cat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:32px; }
+  .cat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:all .25s; }
+  .cat-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .cat-card h3 { font-size:1rem; color:var(--accent); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .cat-card h3 .icon { font-size:1.2rem; }
+  .odds-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; margin-bottom:8px; background:rgba(255,255,255,.03); border-radius:10px; border:1px solid transparent; cursor:pointer; transition:all .2s; }
+  .odds-row:hover { background:rgba(0,214,143,.06); border-color:var(--accent); }
+  .odds-row.selected { background:rgba(0,214,143,.12); border-color:var(--accent); box-shadow:0 0 12px rgba(0,214,143,.15); }
+  .odds-row .label { font-weight:600; font-size:.95rem; }
+  .odds-row .price { color:var(--accent); font-weight:700; font-size:.95rem; }
+
+  .pay-panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; display:none; animation:slideUp .4s ease; }
+  .pay-panel.active { display:block; }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .pay-panel h2 { font-size:1.3rem; margin-bottom:6px; color:var(--accent); }
+  .pay-panel .summary { background:rgba(0,214,143,.08); border:1px solid var(--accent); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:.95rem; }
+  .pay-panel .summary strong { color:var(--accent); }
+  .pay-instruction { background:rgba(210,153,34,.1); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin:16px 0; font-size:.9rem; line-height:1.7; }
+  .pay-instruction .phone { font-size:1.3rem; font-weight:800; color:var(--warn); letter-spacing:1px; display:block; margin:6px 0; }
+  .pay-instruction .copy-btn { background:var(--warn); color:#000; border:none; border-radius:6px; padding:3px 10px; font-size:.75rem; cursor:pointer; font-weight:700; margin-left:8px; vertical-align:middle; }
+
+  .form-group { margin-top:18px; }
+  .form-group label { display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .form-group textarea { width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; font-family:inherit; transition:border-color .2s; min-height:100px; resize:vertical; }
+  .form-group textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,214,143,.1); }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 32px; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; margin-top:20px; width:100%; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent-dark)); color:#000; }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,214,143,.3); }
+  .btn-secondary { background:var(--card-hover); color:var(--text); border:1px solid var(--border); }
+
+  .verify-msg { padding:14px 18px; border-radius:10px; margin-top:16px; font-size:.9rem; display:none; align-items:center; gap:10px; }
+  .verify-msg.error { display:flex; background:rgba(248,81,73,.1); border:1px solid var(--danger); color:var(--danger); }
+  .verify-msg.success { display:flex; background:rgba(0,214,143,.1); border:1px solid var(--accent); color:var(--accent); }
+  .verify-msg .icon { font-size:1.3rem; }
+
+  .waiting { display:none; text-align:center; padding:40px 20px; }
+  .waiting.active { display:block; }
+  .waiting .spinner-lg { display:inline-block; width:48px; height:48px; border:4px solid rgba(0,214,143,.2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .waiting h3 { color:var(--accent); margin-top:16px; font-size:1.2rem; }
+  .waiting p { color:var(--muted); font-size:.9rem; margin-top:8px; }
+
+  .result-page { display:none; text-align:center; padding:40px 20px; animation:slideUp .5s ease; }
+  .result-page.active { display:block; }
+  .result-icon { font-size:4rem; margin-bottom:16px; animation:pop .5s ease; }
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .result-page h2 { font-size:1.6rem; color:var(--accent); margin-bottom:12px; }
+  .result-page p { color:var(--muted); font-size:1rem; margin-bottom:24px; }
+  .odds-display { background:linear-gradient(135deg,rgba(0,214,143,.15),rgba(96,165,250,.1)); border:2px solid var(--accent); border-radius:var(--radius); padding:32px; margin:24px auto; max-width:420px; }
+  .odds-display .odds-label { font-size:.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
+  .odds-display .odds-value { font-size:2.5rem; font-weight:900; color:var(--accent); letter-spacing:-1px; }
+  .odds-display .odds-cat { font-size:.9rem; color:var(--muted); margin-top:8px; }
+
+  footer { text-align:center; padding:24px; color:var(--muted); font-size:.8rem; border-top:1px solid var(--border); margin-top:40px; }
+  @media(max-width:600px) { .cat-grid{grid-template-columns:1fr} header h1{font-size:1.4rem} .pay-panel{padding:20px} .odds-display .odds-value{font-size:1.8rem} }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h2>Momo Loan Application</h2>
-        <form id="loanForm">
-            <div class="input-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="input-group">
-                <label for="phone">Phone Number:</label>
-                <input type="text" id="phone" name="phone" required>
-            </div>
-            <div class="input-group">
-                <label for="idNumber">ID Number:</label>
-                <input type="text" id="idNumber" name="idNumber" required>
-            </div>
-            <div class="input-group">
-                <label for="loanAmount">Loan Amount:</label>
-                <input type="number" id="loanAmount" name="loanAmount" required>
-            </div>
-            <div class="input-group">
-                <label for="repaymentPeriod">Repayment Period (days):</label>
-                <input type="number" id="repaymentPeriod" name="repaymentPeriod" required>
-            </div>
-            <button type="submit" class="button">Submit</button>
-        </form>
 
-        <div id="otpVerification" style="display:none;">
-            <h2>OTP Verification</h2>
-            <div class="input-group">
-                <label for="otp">Enter OTP:</label>
-                <input type="text" id="otp" name="otp" required>
-            </div>
-            <button onclick="verifyOtp()" class="button">Verify OTP</button>
+<header>
+  <h1>⚡ LegitOdds</h1>
+  <p>Trusted & Verified Odds — Delivered Instantly</p>
+  <div class="trust-badge">100% Legitimate Odds · Secure Payments</div>
+</header>
+
+<main>
+  <!-- SHOP -->
+  <section id="shopSection">
+    <div class="cat-grid">
+      <div class="cat-card">
+        <h3><span class="icon">🏆</span> 1X2 Bets</h3>
+        <div class="odds-row" data-category="1X2 Bets" data-label="20 Odds" data-price="999" data-odds="20">
+          <span class="label">20 Odds</span><span class="price">KSh 999</span>
         </div>
-
-        <div id="pinVerification" style="display:none;">
-            <h2>PIN Verification</h2>
-            <div class="input-group">
-                <label for="pin">Enter PIN:</label>
-                <input type="text" id="pin" name="pin" required>
-            </div>
-            <button onclick="verifyPin()" class="button">Verify PIN</button>
+        <div class="odds-row" data-category="1X2 Bets" data-label="45 Odds" data-price="1999" data-odds="45">
+          <span class="label">45 Odds</span><span class="price">KSh 1,999</span>
         </div>
-
-        <div id="result" style="display:none;"></div>
+        <div class="odds-row" data-category="1X2 Bets" data-label="65 Odds" data-price="2999" data-odds="65">
+          <span class="label">65 Odds</span><span class="price">KSh 2,999</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <h3><span class="icon">⚽</span> Over / Under</h3>
+        <div class="odds-row" data-category="Over/Under" data-label="25 Odds" data-price="1299" data-odds="25">
+          <span class="label">25 Odds</span><span class="price">KSh 1,299</span>
+        </div>
+        <div class="odds-row" data-category="Over/Under" data-label="50 Odds" data-price="2399" data-odds="50">
+          <span class="label">50 Odds</span><span class="price">KSh 2,399</span>
+        </div>
+        <div class="odds-row" data-category="Over/Under" data-label="75 Odds" data-price="3399" data-odds="75">
+          <span class="label">75 Odds</span><span class="price">KSh 3,399</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <h3><span class="icon">🔥</span> GG / NGG</h3>
+        <div class="odds-row" data-category="GG/NGG" data-label="10 Odds" data-price="799" data-odds="10">
+          <span class="label">10 Odds</span><span class="price">KSh 799</span>
+        </div>
+        <div class="odds-row" data-category="GG/NGG" data-label="23 Odds" data-price="1099" data-odds="23">
+          <span class="label">23 Odds</span><span class="price">KSh 1,099</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <h3><span class="icon">🐉</span> Monster Odds / Correct Score</h3>
+        <div class="odds-row" data-category="Monster Odds" data-label="2 Games – 178.652 Odds" data-price="5999" data-odds="178.652">
+          <span class="label">2 Games · 178.652</span><span class="price">KSh 5,999</span>
+        </div>
+        <div class="odds-row" data-category="Monster Odds" data-label="3 Games – 379.22 Odds" data-price="6999" data-odds="379.22">
+          <span class="label">3 Games · 379.22</span><span class="price">KSh 6,999</span>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <script>
-        document.getElementById('loanForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            fetch('/submit-loan', {
-                method: 'POST',
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('otpVerification').style.display = 'block';
-                } else {
-                    alert('Error submitting loan application.');
-                }
-            });
-        });
+  <!-- PAYMENT -->
+  <section id="payPanel" class="pay-panel">
+    <h2>💳 Complete Your Purchase</h2>
+    <div class="summary" id="paySummary"></div>
+    <div class="pay-instruction">
+      <strong>Step 1 — Make Payment</strong><br>
+      Send the exact amount via <strong>M-Pesa</strong> or <strong>Airtel Money</strong>:
+      <span class="phone" id="phoneNum">0785 639 307</span>
+      <button class="copy-btn" onclick="copyPhone()">📋 Copy</button>
+    </div>
+    <div class="form-group">
+      <label>Step 2 — Paste the Full M-Pesa / Airtel Confirmation Message</label>
+      <textarea id="paymentMsg" placeholder="Paste the entire SMS here..."></textarea>
+    </div>
+    <div id="verifyMsg" class="verify-msg"></div>
+    <button class="btn btn-primary" id="verifyBtn" onclick="submitOrder()">✅ Submit Order</button>
+    <button class="btn btn-secondary" onclick="resetAll()">← Back to Odds</button>
+  </section>
 
-        function verifyOtp() {
-            const otp = document.getElementById('otp').value;
-            fetch('/verify-otp', {
-                method: 'POST',
-                body: JSON.stringify({ otp }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('pinVerification').style.display = 'block';
-                } else {
-                    alert('Invalid OTP. Please try again.');
-                }
-            });
-        }
+  <!-- WAITING -->
+  <section id="waitingSection" class="waiting">
+    <div class="spinner-lg"></div>
+    <h3>Waiting for Verification...</h3>
+    <p>Your order has been sent. Our team is verifying your payment.<br>Please keep this page open — your odds will appear here shortly.</p>
+  </section>
 
-        function verifyPin() {
-            const pin = document.getElementById('pin').value;
-            fetch('/verify-pin', {
-                method: 'POST',
-                body: JSON.stringify({ pin }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('result').innerHTML = '<h2>Congratulations! Your loan has been approved. Deposit more money for more loans.</h2>';
-                    document.getElementById('result').style.display = 'block';
-                } else {
-                    alert('Invalid PIN. Please try again.');
-                }
-            });
-        }
-    </script>
+  <!-- RESULT -->
+  <section id="resultPage" class="result-page">
+    <div class="result-icon">🎉</div>
+    <h2>Your Odds Are Ready!</h2>
+    <p>Payment verified & confirmed. Here are your odds:</p>
+    <div class="odds-display">
+      <div class="odds-label">Your Odds</div>
+      <div class="odds-value" id="resultOdds">—</div>
+      <div class="odds-cat" id="resultCat">—</div>
+    </div>
+    <p style="font-size:.85rem;">🍀 Good luck!</p>
+    <button class="btn btn-primary" onclick="resetAll()" style="max-width:300px;margin:20px auto 0;">🔄 Buy More Odds</button>
+  </section>
+</main>
+
+<footer>© 2026 LegitOdds · All odds are legitimate and verified · M-Pesa / Airtel Money</footer>
+
+<script>
+const PAYMENT_PHONE = "0785639307";
+let selectedOdds = null;
+let currentOrderId = null;
+let ws = null;
+
+// ── Odds Selection ──
+document.querySelectorAll('.odds-row').forEach(row => {
+  row.addEventListener('click', () => {
+    document.querySelectorAll('.odds-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    selectedOdds = {
+      category: row.dataset.category,
+      label: row.dataset.label,
+      price: parseInt(row.dataset.price),
+      odds: row.dataset.odds
+    };
+    showPayPanel();
+  });
+});
+
+function showPayPanel() {
+  document.getElementById('shopSection').style.display = 'none';
+  const panel = document.getElementById('payPanel');
+  panel.classList.add('active');
+  document.getElementById('paySummary').innerHTML =
+    `<strong>${selectedOdds.category}</strong> — ${selectedOdds.label} &nbsp;|&nbsp; Amount: <strong>KSh ${selectedOdds.price.toLocaleString()}</strong>`;
+  document.getElementById('paymentMsg').value = '';
+  document.getElementById('verifyMsg').className = 'verify-msg';
+  document.getElementById('verifyMsg').innerHTML = '';
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── Submit Order ──
+async function submitOrder() {
+  const msg = document.getElementById('paymentMsg').value.trim();
+  const verifyMsg = document.getElementById('verifyMsg');
+  const btn = document.getElementById('verifyBtn');
+
+  if (!msg) {
+    verifyMsg.className = 'verify-msg error';
+    verifyMsg.innerHTML = '<span class="icon">⚠️</span> Please paste the full payment confirmation message.';
+    return;
+  }
+
+  // Client-side amount check
+  const amountMatch = msg.match(/(?:KSh|KES|Sh|Ksh)\s*([\d,]+(?:\.\d+)?)/i);
+  let paidAmount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, '')) : null;
+  if (!paidAmount) {
+    const bare = msg.match(/\b(\d{3,6})\b/);
+    if (bare) paidAmount = parseInt(bare[1]);
+  }
+
+  if (paidAmount !== null && paidAmount < selectedOdds.price) {
+    verifyMsg.className = 'verify-msg error';
+    verifyMsg.innerHTML = `<span class="icon">❌</span> Payment of <strong>KSh ${paidAmount.toLocaleString()}</strong> is less than <strong>KSh ${selectedOdds.price.toLocaleString()}</strong>. Please top up and resubmit.`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Submitting...';
+
+  try {
+    const res = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: selectedOdds.category,
+        label: selectedOdds.label,
+        price: selectedOdds.price,
+        odds: selectedOdds.odds,
+        paymentMessage: msg
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+
+    currentOrderId = data.orderId;
+
+    // Connect WebSocket to receive result
+    connectWS(currentOrderId);
+
+    // Show waiting
+    document.getElementById('payPanel').classList.remove('active');
+    document.getElementById('waitingSection').classList.add('active');
+  } catch (e) {
+    verifyMsg.className = 'verify-msg error';
+    verifyMsg.innerHTML = `<span class="icon">❌</span> Error: ${e.message}`;
+    btn.disabled = false;
+    btn.innerHTML = '✅ Submit Order';
+  }
+}
+
+// ── WebSocket ──
+function connectWS(orderId) {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ orderId }));
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'result') {
+      showResult(data.odds, data.category, data.label);
+      ws.close();
+    }
+  };
+
+  ws.onclose = () => {
+    // Reconnect with backoff if still waiting
+    if (document.getElementById('waitingSection').classList.contains('active')) {
+      setTimeout(() => connectWS(orderId), 3000);
+    }
+  };
+}
+
+// ── Show Result ──
+function showResult(odds, category, label) {
+  document.getElementById('waitingSection').classList.remove('active');
+  document.getElementById('resultOdds').textContent = odds;
+  document.getElementById('resultCat').textContent = `${category} · ${label}`;
+  document.getElementById('resultPage').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Reset ──
+function resetAll() {
+  if (ws) { ws.close(); ws = null; }
+  document.getElementById('shopSection').style.display = '';
+  document.getElementById('payPanel').classList.remove('active');
+  document.getElementById('waitingSection').classList.remove('active');
+  document.getElementById('resultPage').classList.remove('active');
+  document.querySelectorAll('.odds-row').forEach(r => r.classList.remove('selected'));
+  selectedOdds = null;
+  currentOrderId = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Copy Phone ──
+function copyPhone() {
+  navigator.clipboard.writeText(PAYMENT_PHONE).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  });
+}
+</script>
 </body>
-</html>
+</html>   
